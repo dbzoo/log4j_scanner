@@ -79,7 +79,8 @@ def main():
             for name in files:
                 if name.endswith(('.jar','.war','.ear')):
                     filename = os.path.join(root,name)
-                    issue = issue or handleJar(filename, filename)
+                    if handleJar(filename, filename):
+                        issue = 1
     return issue
  
 if __name__ == "__main__":

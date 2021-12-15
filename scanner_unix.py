@@ -42,7 +42,6 @@ vulnVersions = { # sha256
     "ee41ae7ae80f5c533548a89c6d6e112df609c838b901daea99ac88ccda2a5da1": "log4j 2.7",           # MessagePatternConverter.class
     "f0a869f7da9b17d0a23d0cb0e13c65afa5e42e9567b47603a8fc0debc7ef193c": "log4j 2.14",          # MessagePatternConverter.class
     "f8baca973f1874b76cfaed0f4c17048b1ac0dee364abfdfeeec62de3427def50": "log4j 2.0-rc1",       # MessagePatternConverter.class
-
     "ce69c1ea49c60f3be90cb9c86d7220af86e5d2fbc08fd7232da7278926e4f881": "log4j 2.0-alpha1/alpha2/beta1", # MessagePatternConverter.class
     "963ee03ebe020703fea27f657496d35edeac264beebeb14bfcd9d3350343c0bf": "log4j 2.0-beta2/beta3",         # MessagePatternConverter.class
     "be8f32ed92f161df72248dcbaaf761c812ddbb59434abfd5c87482e9e0bd983c": "log4j 2.0-beta4",               # MessagePatternConverter.class
@@ -87,7 +86,8 @@ def main():
             for name in files:
                 if name.endswith(('.jar','.war','.ear')):
                     filename = os.path.join(root,name)
-                    issue = issue or handleJar(filename, filename)
+                    if handleJar(filename, filename):
+                        issue = 1
     return issue
 
 if __name__ == "__main__":
