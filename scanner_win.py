@@ -64,7 +64,7 @@ def handleJar(fh, filename):
                         print "Indicator for vulnerable component found in %s: %s" % (filename, desc)
                         return 1
                 elif name.endswith(('.war','.ear','.jar')):
-                    return handleJar(io.BytesIO(z.read(name)), filename+":"+name)
+                    return handleJar(io.BytesIO(z.read(name)), filename.decode('utf-8')+":"+name)
     except zipfile.BadZipfile:
         print "BadZipfile: Unable to process file %s" % filename
         return 1
