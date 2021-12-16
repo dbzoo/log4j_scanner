@@ -50,6 +50,12 @@ vulnVersions = { # sha256
     "357120b06f61475033d152505c3d43a57c9a9bdc05b835d0939f1662b48fc6c3": "log4j 2.0-beta6/beta7/beta8",   # MessagePatternConverter.class
     }
  
+def digest(fh):
+    m = hashlib.sha256()
+    for chunk in iter(lambda: fh.read(io.DEFAULT_BUFFER_SIZE), b''):
+        m.update(chunk)
+    return m.hexdigest()
+
 def handleJar(fh, filename):
     if not zipfile.is_zipfile(fh):
         return 0
@@ -57,9 +63,8 @@ def handleJar(fh, filename):
         with zipfile.ZipFile(fh) as z:
             for name in z.namelist():
                 if name.endswith('.class'):
-                    m = hashlib.sha256()
-                    m.update(z.read(name))
-                    desc = vulnVersions.get(m.hexdigest(), None)
+                    with z.open(name) as zh:
+                        desc = vulnVersions.get(digest(zh), None)
                     if desc:
                         print("Indicator for vulnerable component found in %s: %s" % (filename, desc))
                         return 1
