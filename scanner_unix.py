@@ -7,6 +7,8 @@ import io
 import traceback
 
 vulnVersions = { # sha256
+    # https://github.com/hillu/local-log4j-vuln-scanner/blob/master/filter/filter.go
+    # https://gist.github.com/olliencc/8be866ae94b6bee107e3755fd1e9bf0d#file-log4j2-class-sha256sum-txt
     "39a495034d37c7934b64a9aa686ea06b61df21aa222044cc50a47d6903ba1ca8": "log4j 2.0-rc1",       # JndiLookup.class
     "a03e538ed25eff6c4fe48aabc5514e5ee687542f29f2206256840e74ed59bcd2": "log4j 2.0-rc2",       # JndiLookup.class
     "964fa0bf8c045097247fa0c973e0c167df08720409fd9e44546e0ceda3925f3e": "log4j 2.0.1",         # JndiLookup.class
@@ -56,30 +58,36 @@ def digest(fh):
         m.update(chunk)
     return m.hexdigest()
 
+def checkVulnerable(fh, filename):
+    desc = vulnVersions.get(digest(fh), None)
+    if desc:
+        print("Indicator for vulnerable component found in %s: %s" % (filename, desc))
+        return True
+    return False
+
 def handleJar(fh, filename):
     if not zipfile.is_zipfile(fh):
-        return 0
+        return False
     try:
         with zipfile.ZipFile(fh) as z:
             for name in z.namelist():
                 if name.endswith('.class'):
                     with z.open(name) as zh:
-                        desc = vulnVersions.get(digest(zh), None)
-                    if desc:
-                        print("Indicator for vulnerable component found in %s: %s" % (filename, desc))
-                        return 1
+                        if checkVulnerable(zh, filename):
+                            return True
                 elif name.endswith(('.war','.ear','.jar')):
                     return handleJar(io.BytesIO(z.read(name)), filename.decode('utf-8')+":"+name)
     except zipfile.BadZipfile:
         print("BadZipfile: Unable to process file %s" % filename)
-        return 1
-    return 0
+        return True
+    return False
 
 def main():
     exitcode = 0
     mounts = ["/"]
     keepToMount = False
     if os.path.exists('/proc/mounts'):
+        # Avoid scanning NFS/CIFS mounted filesystems. Local Server should scan it.
         with open('/proc/mounts') as f:
             mounts = [line.split()[1] for line in f.readlines() if line[0] == '/' and line[1] != '/']
         keepToMount = True
@@ -90,14 +98,17 @@ def main():
                     dir for dir in dirs
                     if not os.path.ismount(os.path.join(root, dir))]
             for name in files:
-                if name.endswith(('.jar','.war','.ear')):
-                    filename = os.path.join(root,name)
-                    try:
+                filename = os.path.join(root,name)
+                try:
+                    if name.endswith('.class'):
+                        with open(filename,'r') as fh:
+                            checkVulnerable(fh, filename)
+                    elif name.endswith(('.jar','.war','.ear')):
                         if handleJar(filename, filename):
                             exitcode = 1
-                    except:
-                        print("Unhandled exception processing %s" % filename)
-                        traceback.print_exc()
+                except:
+                    print("Unhandled exception processing %s" % filename)
+                    traceback.print_exc()
     return exitcode
 
 if __name__ == "__main__":
