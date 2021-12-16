@@ -93,7 +93,8 @@ def main():
                 try:
                     if name.endswith('.class'):
                         with open(filename,'r') as fh:
-                            checkVulnerable(fh, filename)
+                            if checkVulnerable(fh, filename):
+                                exitcode = 1
                     elif name.endswith(('.jar','.war','.ear')):
                         if handleJar(filename, filename):
                             exitcode = 1
