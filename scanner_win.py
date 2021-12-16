@@ -89,13 +89,14 @@ def main():
             continue
         for root, _, files in os.walk(path):
             for name in files:
-                filename = os.path.join(root,name)
                 try:
                     if name.endswith('.class'):
+                        filename = os.path.join(root,name)
                         with open(filename,'r') as fh:
                             if checkVulnerable(fh, filename):
                                 exitcode = 1
                     elif name.endswith(('.jar','.war','.ear')):
+                        filename = os.path.join(root,name)
                         if handleJar(filename, filename):
                             exitcode = 1
                 except:
