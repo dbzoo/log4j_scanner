@@ -61,17 +61,17 @@ def handleJar(fh, filename):
                     m.update(z.read(name))
                     desc = vulnVersions.get(m.hexdigest(), None)
                     if desc:
-                        print "Indicator for vulnerable component found in %s: %s" % (filename, desc)
+                        print("Indicator for vulnerable component found in %s: %s" % (filename, desc))
                         return 1
                 elif name.endswith(('.war','.ear','.jar')):
                     return handleJar(io.BytesIO(z.read(name)), filename.decode('utf-8')+":"+name)
     except zipfile.BadZipfile:
-        print "BadZipfile: Unable to process file %s" % filename
+        print("BadZipfile: Unable to process file %s" % filename)
         return 1
     return 0
  
 def main():
-    issue = 0
+    exitcode = 0
     for path in [ chr(x) + ":\\" for x in range(65,91) if os.path.exists(chr(x) + ":") ]:
         if win32file.GetDriveType(path) == win32file.DRIVE_REMOTE:
             continue
@@ -79,9 +79,13 @@ def main():
             for name in files:
                 if name.endswith(('.jar','.war','.ear')):
                     filename = os.path.join(root,name)
-                    if handleJar(filename, filename):
-                        issue = 1
-    return issue
+                    try:
+                        if handleJar(filename, filename):
+                            exitcode = 1
+                    except:
+                        print("Unhandled exception processing %s" % filename)
+                        traceback.print_exc()
+    return exitcode
  
 if __name__ == "__main__":
     sys.exit(main())
