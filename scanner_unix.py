@@ -6,7 +6,7 @@ import zipfile
 import hashlib
 import io
 import traceback
-from multiprocessing import Process, Queue, JoinableQueue
+from multiprocessing import Process, Queue, JoinableQueue, cpu_count
 
 CVE44228 = "CVE-2021-44228"
 CVE45046 = "CVE-2021-45046"
@@ -127,7 +127,7 @@ def main():
         keepToMount = True
 
     # How many separate file checksum validating processes do we want?
-    for i in range(5):
+    for i in range(min(5, cpu_count())):
         p = Process(target=validateFile, args=(checkQ,msgQ))
         p.daemon = True
         p.start()
