@@ -94,7 +94,7 @@ def handleJar(fh, filename, msgQ):
                         if checkVulnerable(zh, filename, msgQ):
                             return
                 elif name.endswith(('.war','.ear','.jar')):
-                    handleJar(io.BytesIO(z.read(name)), filename.decode('utf-8')+":"+name, msgQ)
+                    handleJar(io.BytesIO(z.read(name)), filename+":"+name.encode('utf-8'), msgQ)
     except zipfile.BadZipfile:
         msgQ.put("BadZipfile: Unable to process file %s" % filename)
 
@@ -138,7 +138,7 @@ def main():
 
     exitcode = 0 if msgQ.empty() else 1 # Messages to report?
     while not msgQ.empty(): # Dump the output.
-        print msgQ.get()
+        print(msgQ.get())
 
     return exitcode
  
