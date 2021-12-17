@@ -5,6 +5,7 @@ import zipfile
 import hashlib
 import io
 import win32file
+import traceback
 from multiprocessing import Process, Queue, JoinableQueue, cpu_count
 
 CVE44228 = "CVE-2021-44228"
