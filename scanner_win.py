@@ -120,7 +120,11 @@ def main():
     msgQ = Queue()
 
     # How many separate file checksum validating processes do we want?
-    for i in range(min(5, cpu_count())):
+    try:
+        cpus = cpu_count()
+    except NotImplementedError:
+        cpus = 2
+    for i in range(min(5,cpus)):
         p = Process(target=validateFile, args=(checkQ,msgQ))
         p.daemon = True
         p.start()
