@@ -97,8 +97,7 @@ def handleJar(fh, filename):
                         if checkVulnerable(zh, filename):
                             return
                 elif name.endswith(('.war','.ear','.jar')):
-                    if handleJar(io.BytesIO(z.read(name)), filename.decode('utf-8')+":"+name):
-                        return
+                    handleJar(io.BytesIO(z.read(name)), filename.decode('utf-8')+":"+name)
     except zipfile.BadZipfile:
         msgQ.put("BadZipfile: Unable to process file %s" % filename)
 
@@ -129,12 +128,10 @@ def main():
         keepToMount = True
 
     # How many separate file checksum validating processes do we want?
-    proc=[]
     for i in range(5):
         p = Process(target=validateFile)
         p.daemon = True
         p.start()
-        proc.append(p)
 
     # Scan the filesystem and queue files for processing.
     for path in mounts:
