@@ -1,10 +1,12 @@
 #!/opt/opsware/agent/bin/python
+# Multiprocessor filesystem Log4j CVE scanner
 import sys
 import os
 import zipfile
 import hashlib
 import io
 import traceback
+from multiprocessing import Process, Queue, JoinableQueue
 
 CVE44228 = "CVE-2021-44228"
 CVE45046 = "CVE-2021-45046"
@@ -69,6 +71,9 @@ vulnVersions = { # sha256
     "fbda3cfc5853ab4744b853398f2b3580505f5a7d67bfb200716ef6ae5be3c8b7": (CVE17571,"log4j 1.2.13-1.2.14")  # SocketNode.class
 }
 
+checkQ = JoinableQueue()
+msgQ = Queue()
+
 def digest(fh):
     m = hashlib.sha256()
     for chunk in iter(lambda: fh.read(io.DEFAULT_BUFFER_SIZE), b''):
@@ -78,29 +83,43 @@ def digest(fh):
 def checkVulnerable(fh, filename):
     cve,desc = vulnVersions.get(digest(fh), (None,None))
     if desc:
-        print("%s, %s, %s" % (cve, filename, desc))
-        return True
-    return False
+        msgQ.put("%s, %s, %s" % (cve, filename, desc))
+    return not desc is None
 
 def handleJar(fh, filename):
     if not zipfile.is_zipfile(fh):
-        return False
+        return
     try:
         with zipfile.ZipFile(fh) as z:
             for name in z.namelist():
                 if name.endswith('.class'):
                     with z.open(name) as zh:
                         if checkVulnerable(zh, filename):
-                            return True
+                            return
                 elif name.endswith(('.war','.ear','.jar')):
-                    return handleJar(io.BytesIO(z.read(name)), filename.decode('utf-8')+":"+name)
+                    if handleJar(io.BytesIO(z.read(name)), filename.decode('utf-8')+":"+name):
+                        return
     except zipfile.BadZipfile:
-        print("BadZipfile: Unable to process file %s" % filename)
-        return True
-    return False
+        msgQ.put("BadZipfile: Unable to process file %s" % filename)
+
+def validateFile():
+    while True:
+        filename = checkQ.get()
+        if filename is None:
+            break
+        try:
+            if filename.endswith('.class'):
+                with open(filename,'r') as fh:
+                    checkVulnerable(fh, filename)
+            elif filename.endswith(('.jar','.war','.ear')):
+                handleJar(filename, filename)
+        except:
+            msgQ.put("Unhandled exception processing %s\n%s" % (filename,traceback.format_exc()))
+        finally:
+            # Whatever happens we are done with this filename
+            checkQ.task_done()
 
 def main():
-    exitcode = 0
     mounts = ["/"]
     keepToMount = False
     if os.path.exists('/proc/mounts'):
@@ -108,6 +127,16 @@ def main():
         with open('/proc/mounts') as f:
             mounts = [line.split()[1] for line in f.readlines() if line[0] == '/' and line[1] != '/']
         keepToMount = True
+
+    # How many separate file checksum validating processes do we want?
+    proc=[]
+    for i in range(5):
+        p = Process(target=validateFile)
+        p.daemon = True
+        p.start()
+        proc.append(p)
+
+    # Scan the filesystem and queue files for processing.
     for path in mounts:
         for root, dirs, files in os.walk(path):
             if keepToMount:
@@ -115,19 +144,15 @@ def main():
                     dir for dir in dirs
                     if not os.path.ismount(os.path.join(root, dir))]
             for name in files:
-                try:
-                    if name.endswith('.class'):
-                        filename = os.path.join(root,name)
-                        with open(filename,'r') as fh:
-                            if checkVulnerable(fh, filename):
-                                exitcode = 1
-                    elif name.endswith(('.jar','.war','.ear')):
-                        filename = os.path.join(root,name)
-                        if handleJar(filename, filename):
-                            exitcode = 1
-                except:
-                    print("Unhandled exception processing %s" % filename)
-                    traceback.print_exc()
+                if name.endswith(('.class','.jar','.war','.ear')):
+                    checkQ.put(os.path.join(root,name))
+
+    checkQ.join()  # Wait for all the work to drain
+
+    exitcode = 0 if msgQ.empty() else 1 # Messages to report?
+    while not msgQ.empty(): # Dump the output.
+        print msgQ.get()
+
     return exitcode
 
 if __name__ == "__main__":
