@@ -71,22 +71,19 @@ vulnVersions = { # sha256
     "fbda3cfc5853ab4744b853398f2b3580505f5a7d67bfb200716ef6ae5be3c8b7": (CVE17571,"log4j 1.2.13-1.2.14")  # SocketNode.class
 }
 
-checkQ = JoinableQueue()
-msgQ = Queue()
-
 def digest(fh):
     m = hashlib.sha256()
     for chunk in iter(lambda: fh.read(io.DEFAULT_BUFFER_SIZE), b''):
         m.update(chunk)
     return m.hexdigest()
 
-def checkVulnerable(fh, filename):
+def checkVulnerable(fh, filename, msgQ):
     cve,desc = vulnVersions.get(digest(fh), (None,None))
     if desc:
         msgQ.put("%s, %s, %s" % (cve, filename, desc))
     return not desc is None
 
-def handleJar(fh, filename):
+def handleJar(fh, filename, msgQ):
     if not zipfile.is_zipfile(fh):
         return
     try:
@@ -94,14 +91,14 @@ def handleJar(fh, filename):
             for name in z.namelist():
                 if name.endswith('.class'):
                     with z.open(name) as zh:
-                        if checkVulnerable(zh, filename):
+                        if checkVulnerable(zh, filename, msgQ):
                             return
                 elif name.endswith(('.war','.ear','.jar')):
-                    handleJar(io.BytesIO(z.read(name)), filename.decode('utf-8')+":"+name)
+                    handleJar(io.BytesIO(z.read(name)), filename.decode('utf-8')+":"+name, msgQ)
     except zipfile.BadZipfile:
         msgQ.put("BadZipfile: Unable to process file %s" % filename)
 
-def validateFile():
+def validateFile(checkQ, msgQ):
     while True:
         filename = checkQ.get()
         if filename is None:
@@ -109,9 +106,9 @@ def validateFile():
         try:
             if filename.endswith('.class'):
                 with open(filename,'r') as fh:
-                    checkVulnerable(fh, filename)
+                    checkVulnerable(fh, filename, msgQ)
             elif filename.endswith(('.jar','.war','.ear')):
-                handleJar(filename, filename)
+                handleJar(filename, filename, msgQ)
         except:
             msgQ.put("Unhandled exception processing %s\n%s" % (filename,traceback.format_exc()))
         finally:
@@ -119,6 +116,8 @@ def validateFile():
             checkQ.task_done()
 
 def main():
+    checkQ = JoinableQueue()
+    msgQ = Queue()
     mounts = ["/"]
     keepToMount = False
     if os.path.exists('/proc/mounts'):
@@ -129,7 +128,7 @@ def main():
 
     # How many separate file checksum validating processes do we want?
     for i in range(5):
-        p = Process(target=validateFile)
+        p = Process(target=validateFile, args=(checkQ,msgQ))
         p.daemon = True
         p.start()
 
