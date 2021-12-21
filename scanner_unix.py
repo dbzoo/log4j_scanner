@@ -11,6 +11,7 @@ from multiprocessing import Process, Queue, JoinableQueue, cpu_count
 CVE44228 = "CVE-2021-44228"
 CVE45046 = "CVE-2021-45046"
 CVE17571 = "CVE-2019-17571"
+CVE4104  = "CVE-2021-4104"
 
 vulnVersions = { # sha256
     # https://github.com/lunasec-io/lunasec/blob/master/tools/log4shell/constants/vulnerablehashes.go
@@ -55,20 +56,41 @@ vulnVersions = { # sha256
     "be8f32ed92f161df72248dcbaaf761c812ddbb59434abfd5c87482e9e0bd983c": (CVE44228,"log4j 2.0-beta4"),               # MessagePatternConverter.class
     "9a54a585ed491573e80e0b32e964e5eb4d6c4068d2abffff628e3c69ef9102cf": (CVE44228,"log4j 2.0-beta5"),               # MessagePatternConverter.class
     "357120b06f61475033d152505c3d43a57c9a9bdc05b835d0939f1662b48fc6c3": (CVE44228,"log4j 2.0-beta6/beta7/beta8"),   # MessagePatternConverter.class
-    # The following shas for version 2.15 detect a valid but lower level of severity vulnerability, CVE  CVE-2021-45046 
+
+    # The following SHAs for version 2.15 detect a valid but lower level of severity vulnerability, CVE  CVE-2021-45046 
     "84057480ba7da6fb6d9ea50c53a00848315833c1f34bf8f4a47f11a14499ae3f": (CVE45046,"log4j 2.15.0"), # JNDILookup.class
     "db07ef1ea174e000b379732681bd835cfede648a7971bf4e9a0d31981582d69e": (CVE45046,"log4j 2.15.0"), # JNDIManager.class
     "5bfbecc21f5de442035c0361c994c379a4f6b5adb280c66e43256c6f09346bd1": (CVE45046,"log4j 2.15.0"), # MessagePatternConverter.class
-    "6adb3617902180bdf9cbcfc08b5a11f3fac2b44ef1828131296ac41397435e3d": (CVE17571,"log4j 1.2.4"),         # SocketNode.class
-    "3ef93e9cb937295175b75182e42ba9a0aa94f9f8e295236c9eef914348efeef0": (CVE17571,"log4j 1.2.6-1.2.9"),   # SocketNode.class
-    "bee4a5a70843a981e47207b476f1e705c21fc90cb70e95c3b40d04a2191f33e9": (CVE17571,"log4j 1.2.8"),         # SocketNode.class
-    "7b996623c05f1a25a57fb5b43c519c2ec02ec2e647c2b97b3407965af928c9a4": (CVE17571,"log4j 1.2.15"),        # SocketNode.class
-    "688a3dadfb1c0a08fb2a2885a356200eb74e7f0f26a197d358d74f2faf6e8f46": (CVE17571,"log4j 1.2.16"),        # SocketNode.class
-    "8ef0ebdfbf28ec14b2267e6004a8eea947b4411d3c30d228a7b48fae36431d74": (CVE17571,"log4j 1.2.17"),        # SocketNode.class
-    "d778227b779f8f3a2850987e3cfe6020ca26c299037fdfa7e0ac8f81385963e6": (CVE17571,"log4j 1.2.11"),        # SocketNode.class
-    "ed5d53deb29f737808521dd6284c2d7a873a59140e702295a80bd0f26988f53a": (CVE17571,"log4j 1.2.5"),         # SocketNode.class
-    "f3b815a2b3c74851ff1b94e414c36f576fbcdf52b82b805b2e18322b3f5fc27c": (CVE17571,"log4j 1.2.12"),        # SocketNode.class
-    "fbda3cfc5853ab4744b853398f2b3580505f5a7d67bfb200716ef6ae5be3c8b7": (CVE17571,"log4j 1.2.13-1.2.14")  # SocketNode.class
+
+    "05140243704b1ea7f05b8ac778ca5df4442b0de2cddcef1a8bd4c595cf1b74ad": (CVE17571,"log4j-1.2.[1234]"), # SimpleSocketServer.class
+    "07d3f12522d24a2c339929271a68cc73d001001e2a53994af662f7d5531789f7": (CVE17571,"log4j-1.2.[567]"), # SimpleSocketServer.class
+    "2b7b4e83b2594bb99a4bde1dcc8b396928de6acba7eae302f23fad5076e361fc": (CVE17571,"log4j-1.2.[13-14]"), # SimpleSocketServer.class
+    "37f824b60ad2063e1339bd12ddfee6e41c73ee0041a35278a2873740062cbe80": (CVE17571,"log4j-1.2.15"), # SocketServer.class
+    "44da77b62370e487fdac8680abf5249a229ce7a332924686c1a85cd2edfc5dd2": (CVE17571,"log4j-1.2.11"), # SimpleSocketServer.class
+    "49a3612ae91ebbacc872c29c87b0b4f8c37f740ae751e521e4054db02d2b0016": (CVE17571,"log4j-1.2.17"), # SimpleSocketServer.class
+    "502f552ecab022c8475a688f5b8debf22fb6deab36aaddc95993d9c45b9ebea0": (CVE17571,"log4j-1.2.8"), # SimpleSocketServer.class
+    "79b01929c4349e82ffd6142486d2f979cac5f223ff6c155c2ccb3c7497b790bf": (CVE17571,"log4j-1.2.12"), # SocketServer.class
+    "7ba0de85720520d409f9ec369788ab6842195c4b3a305fdd52daaba1e7b938a7": (CVE17571,"log4j-1.2.[13-14]"), # SocketServer.class
+    "80596f4634e935b165fbdd6b0c9accc10f7b3148453e76f173c17a9c8eee2645": (CVE17571,"log4j-1.2.8"), # SocketServer.class
+    "81521218b80d1451d714630783878c719697ed2cdcf577b68bafda4ab170ddb7": (CVE17571,"log4j-1.2.[1-7]"), # SocketServer.class
+    "995db425c531b9f7444bf8e7c9c9c2960f98c04b1aad6acec141064ba27e39a2": (CVE17571,"log4j-1.2.12"), # SimpleSocketServer.class
+    "a0addb6c6ff5881b181963e31bd7391d87d610c5f8a26ea9de17489992b7311b": (CVE17571,"log4j-1.2.17"), # SocketServer.class
+    "a7d99d8f67212e0fb35f2c4c30bdbe05d8e8fdc37990946604d003c6b61fa0c4": (CVE17571,"log4j-1.2.9"), # SocketServer.class
+    "aa4759c2d10c74afb90c4de5fa0cb6cef28d48998b16b2ddf17ddc73e9d9cff9": (CVE17571,"log4j-1.2.9"), # SimpleSocketServer.class
+    "c6f70d8788730d8520322b8b10bde9da6b9fc11a363c57fb6f90f71fc1a1c969": (CVE17571,"log4j-1.2.16"), # SimpleSocketServer.class
+    "d2fd233895915033fb6f6290b7c653f9b36f14209c314055ff4c09afac1d79a4": (CVE17571,"log4j-1.2.15"), # SimpleSocketServer.class
+    "dcac0b7f8c7755c85252747b8efafe306c7b8e456aee0ba18001182f3c781c33": (CVE17571,"log4j-1.2.16"), # SocketServer.class
+    "f06133b10aef32d5d5e92eb26f30be8866b1d1a6af7bb1364f0f39ebee0d60a1": (CVE17571,"log4j-1.2.11"), # SocketServer.class
+
+    "2d8c89a2427d89aea8d04bd65b6589dbdbdccb0157e670c40a50c5a994ac64eb": (CVE4104,"log4j 1.2.[1-5]"), # JMSAppender.class
+    "e47ffb2712c2bff64af988957db75209d3e1c76c6926dd5f0db223e87082fcec": (CVE4104,"log4j 1.2.[679]"), # JMSAppender.class
+    "a7e44f4723abaa1c1347440a003264bec75700d5f2c127c75fce782724fa731c": (CVE4104,"log4j 1.2.8"),     # JMSAppender.class
+    "00d64763e75085280c855daf849dcee4b9a7346ffa1a9e1b3a7f753546e1d9d9": (CVE4104,"log4j 1.2.11"),    # JMSAppender.class
+    "a56c88931c5e60e212b5629c306645d38da68bb394dd4fa0bc8999e6dd19fff7": (CVE4104,"log4j 1.2.12"),    # JMSAppender.class
+    "d9502bbe9b7de36e4b4b6b43127f7096ff611e3ffd5eb09949b58f1f7b75237e": (CVE4104,"log4j 1.2.1[34]"), # JMSAppender.class
+    "b230cc5f4d42c040ddfe74f4fe36e6470aadd23b9f6f29e82b00632e595cb9fb": (CVE4104,"log4j 1.2.15"),    # JMSAppender.class
+    "647820ce3b77ce58b0b5e697713909926ea2d67cb16ae1c995f2d0ae74092ccc": (CVE4104,"log4j 1.2.16"),    # JMSAppender.class
+    "72cb29d621bfd54d49915ee04ed89ebade99ed70590f9a74def0f662dae31731": (CVE4104,"log4j 1.2.16"),    # JMSAppender.class
 }
 
 def digest(fh):
