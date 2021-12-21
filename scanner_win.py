@@ -11,6 +11,7 @@ from multiprocessing import Process, Queue, JoinableQueue, cpu_count
 CVE44228 = "CVE-2021-44228"
 CVE45046 = "CVE-2021-45046"
 CVE17571 = "CVE-2019-17571"
+CVE4104  = "CVE-2021-4104"
 
 vulnVersions = { # sha256
     # https://github.com/lunasec-io/lunasec/blob/master/tools/log4shell/constants/vulnerablehashes.go
