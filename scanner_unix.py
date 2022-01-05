@@ -116,7 +116,7 @@ def handleJar(fh, filename, msgQ):
                         if checkVulnerable(zh, filename, msgQ):
                             return
                 elif name.endswith(('.war','.ear','.jar')):
-                    handleJar(io.BytesIO(z.read(name)), filename+":"+name.encode('utf-8'), msgQ)
+                    handleJar(io.BytesIO(z.read(name)), filename+":"+str(name.encode('utf-8')), msgQ)
     except zipfile.BadZipfile:
         msgQ.put("BadZipfile: Unable to process file %s" % filename)
 
@@ -127,7 +127,7 @@ def validateFile(checkQ, msgQ):
             break
         try:
             if filename.endswith('.class'):
-                with open(filename,'r') as fh:
+                with open(filename,'rb') as fh:
                     checkVulnerable(fh, filename, msgQ)
             elif filename.endswith(('.jar','.war','.ear')):
                 handleJar(filename, filename, msgQ)
@@ -150,10 +150,10 @@ def main():
 
     # How many separate file checksum validating processes do we want?
     try:
-        cpus = cpu_count()
+        cpus = cpu_count() - 2
     except NotImplementedError:
         cpus = 2
-    for i in range(min(5,cpus)):
+    for i in range(max(2,cpus)):
         p = Process(target=validateFile, args=(checkQ,msgQ))
         p.daemon = True
         p.start()
