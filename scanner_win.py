@@ -12,6 +12,7 @@ CVE44228 = "CVE-2021-44228"
 CVE45046 = "CVE-2021-45046"
 CVE17571 = "CVE-2019-17571"
 CVE4104  = "CVE-2021-4104"
+CVE44832 = "CVE-2021-44832"
 
 vulnVersions = { # sha256
     # https://github.com/lunasec-io/lunasec/blob/master/tools/log4shell/constants/vulnerablehashes.go
@@ -56,6 +57,7 @@ vulnVersions = { # sha256
     "be8f32ed92f161df72248dcbaaf761c812ddbb59434abfd5c87482e9e0bd983c": (CVE44228,"log4j 2.0-beta4"),               # MessagePatternConverter.class
     "9a54a585ed491573e80e0b32e964e5eb4d6c4068d2abffff628e3c69ef9102cf": (CVE44228,"log4j 2.0-beta5"),               # MessagePatternConverter.class
     "357120b06f61475033d152505c3d43a57c9a9bdc05b835d0939f1662b48fc6c3": (CVE44228,"log4j 2.0-beta6/beta7/beta8"),   # MessagePatternConverter.class
+    "1ac1e0ce33feca95834596faceb3a5b042b2a0c4d612c0e6f5045068bab89cd2": (CVE44832,"<= log4j-core-2.17.0"), # DataSourceConnectionSource.class
 
     # The following SHAs for version 2.15 detect a valid but lower level of severity vulnerability, CVE  CVE-2021-45046 
     "84057480ba7da6fb6d9ea50c53a00848315833c1f34bf8f4a47f11a14499ae3f": (CVE45046,"log4j 2.15.0"), # JNDILookup.class
