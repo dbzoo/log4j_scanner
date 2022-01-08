@@ -62,7 +62,10 @@ vulnVersions = { # sha256
     "84057480ba7da6fb6d9ea50c53a00848315833c1f34bf8f4a47f11a14499ae3f": (CVE45046,"log4j 2.15.0"), # JNDILookup.class
     "db07ef1ea174e000b379732681bd835cfede648a7971bf4e9a0d31981582d69e": (CVE45046,"log4j 2.15.0"), # JNDIManager.class
     "5bfbecc21f5de442035c0361c994c379a4f6b5adb280c66e43256c6f09346bd1": (CVE45046,"log4j 2.15.0"), # MessagePatternConverter.class
+
     "1ac1e0ce33feca95834596faceb3a5b042b2a0c4d612c0e6f5045068bab89cd2": (CVE44832,"<= log4j-core-2.17.0"), # DataSourceConnectionSource.class
+    "0b9e75d6dcf19289a1235c28217077f9994e4e179f4944b676e571af4b795ef4": (CVE44832,"<= log4j-core-2.12.3"), # DataSourceConnectionSource.class
+    "4d9e85fc289c9d9420d771fea05557b7ccecce664d781163131fd9e39d168da6": (CVE44832,"<= log4j-core-2.3.1"), # DataSourceConnectionSource.class
 
     "05140243704b1ea7f05b8ac778ca5df4442b0de2cddcef1a8bd4c595cf1b74ad": (CVE17571,"log4j-1.2.[1234]"), # SimpleSocketServer.class
     "07d3f12522d24a2c339929271a68cc73d001001e2a53994af662f7d5531789f7": (CVE17571,"log4j-1.2.[567]"), # SimpleSocketServer.class

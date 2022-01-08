@@ -57,12 +57,15 @@ vulnVersions = { # sha256
     "be8f32ed92f161df72248dcbaaf761c812ddbb59434abfd5c87482e9e0bd983c": (CVE44228,"log4j 2.0-beta4"),               # MessagePatternConverter.class
     "9a54a585ed491573e80e0b32e964e5eb4d6c4068d2abffff628e3c69ef9102cf": (CVE44228,"log4j 2.0-beta5"),               # MessagePatternConverter.class
     "357120b06f61475033d152505c3d43a57c9a9bdc05b835d0939f1662b48fc6c3": (CVE44228,"log4j 2.0-beta6/beta7/beta8"),   # MessagePatternConverter.class
-    "1ac1e0ce33feca95834596faceb3a5b042b2a0c4d612c0e6f5045068bab89cd2": (CVE44832,"<= log4j-core-2.17.0"), # DataSourceConnectionSource.class
 
     # The following SHAs for version 2.15 detect a valid but lower level of severity vulnerability, CVE  CVE-2021-45046 
     "84057480ba7da6fb6d9ea50c53a00848315833c1f34bf8f4a47f11a14499ae3f": (CVE45046,"log4j 2.15.0"), # JNDILookup.class
     "db07ef1ea174e000b379732681bd835cfede648a7971bf4e9a0d31981582d69e": (CVE45046,"log4j 2.15.0"), # JNDIManager.class
     "5bfbecc21f5de442035c0361c994c379a4f6b5adb280c66e43256c6f09346bd1": (CVE45046,"log4j 2.15.0"), # MessagePatternConverter.class
+
+    "1ac1e0ce33feca95834596faceb3a5b042b2a0c4d612c0e6f5045068bab89cd2": (CVE44832,"<= log4j-core-2.17.0"), # DataSourceConnectionSource.class
+    "0b9e75d6dcf19289a1235c28217077f9994e4e179f4944b676e571af4b795ef4": (CVE44832,"<= log4j-core-2.12.3"), # DataSourceConnectionSource.class
+    "4d9e85fc289c9d9420d771fea05557b7ccecce664d781163131fd9e39d168da6": (CVE44832,"<= log4j-core-2.3.1"), # DataSourceConnectionSource.class 
 
     "05140243704b1ea7f05b8ac778ca5df4442b0de2cddcef1a8bd4c595cf1b74ad": (CVE17571,"log4j-1.2.[1234]"), # SimpleSocketServer.class
     "07d3f12522d24a2c339929271a68cc73d001001e2a53994af662f7d5531789f7": (CVE17571,"log4j-1.2.[567]"), # SimpleSocketServer.class
